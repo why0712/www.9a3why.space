@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic">
+<meta name="robots" content="noindex">
+<title>PROJECTS - 9A3WHY</title>
+<meta name="description" content="Projects of 9A3WHY: CroMesh docs, PINGBOT, Focusrite PRO audio on Debian and the self-hosting guide.">
+<style>
+  :root {
+    --bg: #000;
+    --green: #39ff14;
+    --green-dim: #1a8f0a;
+    --blue: #1e90ff;
+    --blue-glow: #00bfff;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: var(--mono);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* faint grid + scanlines */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(rgba(57,255,20,.05) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(30,144,255,.05) 1px, transparent 1px) 0 0 / 40px 40px;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.35) 3px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 20px 40px;
+    text-align: center;
+  }
+
+  /* radio waves behind the callsign */
+  .waves { position: relative; height: 130px; margin-bottom: 8px; }
+  .waves span {
+    position: absolute; left: 50%; bottom: 0;
+    width: 20px; height: 20px;
+    border: 2px solid var(--blue);
+    border-radius: 50%;
+    transform: translateX(-50%) scale(1);
+    opacity: 0;
+    animation: ping 3.6s ease-out infinite;
+  }
+  .waves span:nth-child(2) { animation-delay: 1.2s; border-color: var(--green); }
+  .waves span:nth-child(3) { animation-delay: 2.4s; }
+  @keyframes ping {
+    0%   { opacity: .9; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0;  transform: translateX(-50%) scale(9); }
+  }
+  .mast {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 60px; height: 120px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3rem, 12vw, 6.5rem);
+    letter-spacing: .12em;
+    color: var(--blue);
+    text-shadow: 0 0 8px var(--blue), 0 0 24px var(--blue-glow), 0 0 48px rgba(0,191,255,.5);
+    animation: flicker 6s infinite;
+  }
+  @keyframes flicker {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: .75; }
+    95% { opacity: 1; }
+    97% { opacity: .85; }
+  }
+  .sub {
+    margin: .2em 0 2.2em;
+    color: var(--green-dim);
+    letter-spacing: .35em;
+    font-size: .85rem;
+    text-transform: uppercase;
+  }
+
+  .welcome {
+    font-size: clamp(1.05rem, 3.4vw, 1.6rem);
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(57,255,20,.7), 0 0 18px rgba(57,255,20,.35);
+    margin: 0 0 2.4em;
+  }
+  .welcome .call { color: var(--blue); text-shadow: 0 0 8px var(--blue), 0 0 18px var(--blue-glow); font-weight: bold; }
+  .cursor {
+    display: inline-block; width: .6em; height: 1.1em;
+    background: var(--green);
+    vertical-align: text-bottom;
+    margin-left: .2em;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .qsl-link { margin: -1.3em 0 2.4em; }
+  .qsl-link a {
+    display: inline-block; padding: 8px 20px; text-decoration: none;
+    border: 1px solid var(--green-dim); border-radius: 3px; background: rgba(0,20,0,.45);
+    color: var(--blue); font-size: .9rem; letter-spacing: .25em; text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(30,144,255,.6);
+    transition: border-color .2s, box-shadow .2s, color .2s, transform .2s;
+  }
+  .qsl-link a:hover, .qsl-link a:focus-visible { border-color: var(--blue); color: var(--green); box-shadow: 0 0 16px rgba(30,144,255,.5); transform: translateY(-2px); outline: none; }
+
+  /* waveform divider */
+  .wave { width: 100%; height: 60px; margin: 0 0 2em; }
+  .wave path {
+    fill: none; stroke-width: 2;
+    stroke-dasharray: 8 6;
+    animation: dash 3s linear infinite;
+  }
+  .wave path.g { stroke: var(--green); filter: drop-shadow(0 0 4px var(--green)); }
+  .wave path.b { stroke: var(--blue);  filter: drop-shadow(0 0 4px var(--blue)); animation-direction: reverse; }
+  @keyframes dash { to { stroke-dashoffset: -56; } }
+
+  .group { margin: 0 0 2.6em; }
+  .group-title { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; font-size: .95rem; font-weight: normal; letter-spacing: .25em; text-transform: uppercase; text-align: left; color: var(--blue); text-shadow: 0 0 8px rgba(30,144,255,.6); }
+  .group-title::before { content: ">"; color: var(--green); }
+  .group-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--green-dim), transparent); }
+  .group-title .live { color: var(--green); text-shadow: 0 0 8px rgba(57,255,20,.7); }
+
+  .links {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  .card {
+    display: block;
+    padding: 20px 22px;
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--green);
+    background: rgba(0,20,0,.45);
+    position: relative;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .card::before, .card::after {
+    content: ""; position: absolute; width: 14px; height: 14px;
+    border: 2px solid var(--blue);
+  }
+  .card::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .card::after  { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+  .card:hover, .card:focus-visible {
+    border-color: var(--blue);
+    box-shadow: 0 0 18px rgba(30,144,255,.55), inset 0 0 18px rgba(30,144,255,.12);
+    transform: translateY(-3px);
+    outline: none;
+  }
+  .card .tag { display: block; color: var(--blue); font-size: .75rem; letter-spacing: .15em; text-transform: uppercase; line-height: 1.4; }
+  .card .name { display: block; font-size: 1.25rem; margin: .3em 0; text-shadow: 0 0 6px rgba(57,255,20,.6); }
+  .card .desc { color: #7fd36f; font-size: .85rem; }
+  .card .url  { display: block; margin-top: .8em; color: var(--blue); font-size: .8rem; word-break: break-all; }
+
+  @media (max-width: 560px) { .links { grid-template-columns: 1fr; } }
+
+
+  /* link cards with a screenshot of the target page as background */
+  .card.has-bg { --o1: .90; --o2: .76; --o3: .40; }
+  .card.has-bg.dark-bg { --o1: .60; --o2: .40; --o3: .10; }
+  .card.has-bg {
+    background:
+      linear-gradient(90deg, rgba(0,8,0,var(--o1)) 0%, rgba(0,8,0,var(--o2)) 55%, rgba(0,8,0,var(--o3)) 100%),
+      var(--bg) center / cover no-repeat;
+  }
+  .card.has-bg:hover, .card.has-bg:focus-visible {
+    background:
+      linear-gradient(90deg, rgba(0,8,0,calc(var(--o1) - .1)) 0%, rgba(0,8,0,calc(var(--o2) - .15)) 55%, rgba(0,8,0,calc(var(--o3) - .1)) 100%),
+      var(--bg) center / cover no-repeat;
+  }
+  .card.has-bg .tag  { color: #8fd4ff; font-weight: bold; text-shadow: 0 1px 3px #000, 0 0 8px #000; }
+  .card.has-bg .name { color: #f4ffec; text-shadow: 0 1px 3px #000, 0 0 10px #000, 0 0 16px rgba(57,255,20,.5); }
+  .card.has-bg .desc { color: #e6f8df; text-shadow: 0 1px 3px #000, 0 0 8px #000; }
+  .card.has-bg .url  { color: #9bd9ff; font-weight: bold; text-shadow: 0 1px 3px #000, 0 0 8px #000; }
+
+  footer {
+    margin-top: 3.5em;
+    color: var(--green-dim);
+    font-size: .8rem;
+    letter-spacing: .2em;
+  }
+  footer b { color: var(--blue); font-weight: normal; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  .card .tag, .card .name, .card .desc, .card .url { overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+
+  <div class="waves" aria-hidden="true">
+    <span></span><span></span><span></span>
+    <svg class="mast" viewBox="0 0 60 120" fill="none" stroke-width="2">
+      <g stroke="#39ff14" style="filter:drop-shadow(0 0 3px #39ff14)">
+        <path d="M30 118 V10"/>
+        <path d="M12 118 L30 40 L48 118"/>
+        <path d="M18 90 H42 M22 70 H38 M26 52 H34"/>
+      </g>
+      <g stroke="#1e90ff" style="filter:drop-shadow(0 0 3px #1e90ff)">
+        <path d="M10 24 H50"/><path d="M16 14 H44"/><path d="M22 4 H38"/>
+      </g>
+    </svg>
+  </div>
+
+  <h1>PROJECTS</h1>
+  <p class="sub">// radio and mesh projects //</p>
+
+  <p class="qsl-link"><a href="/">&lt; 9A3WHY</a></p>
+
+  <svg class="wave" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path class="g" d="M0 30 Q 25 0 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30 T 650 30 T 700 30 T 750 30 T 800 30"/>
+    <path class="b" d="M0 30 Q 12 60 25 30 T 50 30 T 75 30 T 100 30 T 125 30 T 150 30 T 175 30 T 200 30 T 225 30 T 250 30 T 275 30 T 300 30 T 325 30 T 350 30 T 375 30 T 400 30 T 425 30 T 450 30 T 475 30 T 500 30 T 525 30 T 550 30 T 575 30 T 600 30 T 625 30 T 650 30 T 675 30 T 700 30 T 725 30 T 750 30 T 775 30 T 800 30"/>
+  </svg>
+
+  <section class="group" aria-labelledby="g-radio">
+  <h2 class="group-title" id="g-radio">Projects</h2>
+  <nav class="links" aria-label="Projects">
+    <a class="card has-bg dark-bg" style="--bg:url(/img/cards/docs.jpg)" href="https://docs.cromesh.eu" target="_blank" rel="noopener">
+      <span class="tag">Documentation of CroMesh.eu</span>
+      <span class="name">&gt;&nbsp;docs.cromesh.eu</span>
+      <span class="desc">CroMesh documentation.</span>
+      <span class="url">https://docs.cromesh.eu</span>
+    </a>
+    <a class="card has-bg dark-bg" style="--bg:url(/img/cards/pingbot.jpg)" href="/projects/pingbot/">
+      <span class="tag">PINGBOT - Meshtastic ping bot</span>
+      <span class="name">&gt;&nbsp;/projects/pingbot</span>
+      <span class="desc">MeshBot 9A3WHY: automated PONG replies, help and info commands, easter eggs.</span>
+      <span class="url">9a3why.space/projects/pingbot/</span>
+    </a>
+    <a class="card has-bg dark-bg" style="--bg:url(/img/cards/focusrite.jpg)" href="/projects/focusrite/">
+      <span class="tag">PROJECT - Focusrite PRO audio @ Debian Trixie</span>
+      <span class="name">&gt;&nbsp;/projects/focusrite</span>
+      <span class="desc">Scarlett 2i2 and 8i6 on Linux: PipeWire, ALSA and the 2i2 kernel fix. Source on GitHub.</span>
+      <span class="url">9a3why.space/projects/focusrite/</span>
+    </a>
+    <a class="card has-bg" style="--bg:url(/img/cards/hosting.jpg)" href="/projects/hosting/">
+      <span class="tag">GUIDE - host a website at home</span>
+      <span class="name">&gt;&nbsp;/projects/hosting</span>
+      <span class="desc">Unofficial step-by-step guide: nginx, Cloudflare Tunnel, firewall, updates, uptime alerts and backups.</span>
+      <span class="url">9a3why.space/projects/hosting/</span>
+    </a>
+  </nav>
+  </section>
+
+  <footer>
+    <b>9A3WHY</b> &middot; QRV &middot; 73 DE 9A3WHY &middot; <a href="/privacy/">privacy</a> &middot; <a href="/terms/">terms</a>
+  </footer>
+
+</main>
+</body>
+</html>

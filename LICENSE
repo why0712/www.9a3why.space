@@ -1,0 +1,40 @@
+9A3WHY.space - license notice
+=============================
+
+Copyright (c) 2026 Amir Jasarevic (9A3WHY)
+
+WHAT IS LICENSED
+The source code, page text and documentation of this repository - that is,
+the HTML, CSS and JavaScript of the site, the scripts in scripts/, the
+documentation in README.md and docs/, and the configuration snippets - are
+licensed under the
+
+    Creative Commons Attribution-ShareAlike 4.0 International license
+    (CC BY-SA 4.0, SPDX: CC-BY-SA-4.0)
+
+    Summary:  https://creativecommons.org/licenses/by-sa/4.0/
+    Full text: LICENSE-CC-BY-SA-4.0.txt in this repository, which is the
+               unmodified legal code from
+               https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt
+
+You may share and adapt this material, including commercially, if you give
+appropriate credit (for example "9A3WHY, www.9a3why.space"), indicate if
+you made changes, and distribute your contributions under the same license.
+The summary is not a substitute for the license text; the license text
+governs.
+
+WHAT IS NOT LICENSED (all rights reserved)
+- The photographs: gallery/images/ and gallery/images/thumbs/
+- The QSL card: img/qsl-9a3why.webp
+- The photo banner and shack picture: img/cromesh.webp, img/filmstrip.webp
+  (the CroMesh.eu banner content belongs to its respective owners)
+- The card background screenshots in img/cards/. They show pages of other
+  websites and belong to their respective owners; they are included only to
+  illustrate the links.
+- Names, logos and call sign "9A3WHY" as identifiers of the person.
+
+These items may not be copied or reused without written permission.
+
+OTHER PROJECTS
+The PINGBOT code (github.com/why0712/meshtastic.ping.bot) is a separate
+project with its own license (CC BY-SA 4.0), see its own repository.

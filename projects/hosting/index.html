@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Hosting guide: an unofficial beginner's guide to hosting your own website at home with nginx, a Cloudflare Tunnel, a firewall, automatic updates, uptime alerts and backups.">
+<title>HOSTING GUIDE - 9A3WHY</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ctext x='6' y='44' fill='%2339ff14' font-family='monospace' font-size='30' font-weight='700'%3E%3E%24%3C/text%3E%3C/svg%3E">
+<script>document.documentElement.className += " js";</script>
+<style>
+  :root {
+    --bg: #000;
+    --green: #39ff14;
+    --green-dim: #1a8f0a;
+    --blue: #1e90ff;
+    --blue-glow: #00bfff;
+    --grey: #8b9399;
+    --line: #1d2a1a;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: var(--mono);
+    line-height: 1.65;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(rgba(57,255,20,.05) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(30,144,255,.05) 1px, transparent 1px) 0 0 / 40px 40px;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.35) 3px);
+    pointer-events: none;
+    z-index: 10;
+  }
+  main {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+  a { color: var(--blue); }
+  a:hover, a:focus-visible { color: var(--green); outline: none; }
+
+  .back { display: inline-block; text-decoration: none; font-size: .85rem; letter-spacing: .2em; text-shadow: 0 0 6px var(--blue); }
+
+  .hero { text-align: center; padding: 30px 0 6px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.8rem, 11vw, 6rem);
+    letter-spacing: .1em;
+    color: var(--blue);
+    text-shadow: 0 0 8px var(--blue), 0 0 24px var(--blue-glow), 0 0 48px rgba(0,191,255,.5);
+    animation: flicker 6s infinite;
+  }
+  @keyframes flicker { 0%,92%,100%{opacity:1} 93%{opacity:.75} 95%{opacity:1} 97%{opacity:.85} }
+  .sub { margin: .2em 0 1.6em; color: var(--green-dim); letter-spacing: .3em; font-size: .85rem; text-transform: uppercase; }
+  .tagline { font-size: clamp(1.05rem, 3.4vw, 1.5rem); text-shadow: 0 0 6px rgba(57,255,20,.7), 0 0 18px rgba(57,255,20,.35); margin: 0 0 1em; }
+  .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; margin-left: .2em; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 1.6em; padding: 0; list-style: none; }
+  .badges li { border: 1px solid var(--green-dim); border-radius: 3px; padding: 3px 10px; font-size: .72rem; letter-spacing: .15em; text-transform: uppercase; background: rgba(0,20,0,.45); }
+  .badges li b { color: var(--blue); font-weight: normal; }
+
+  .wave { width: 100%; height: 50px; margin: 0 0 1.4em; }
+  .wave path { fill: none; stroke-width: 2; stroke-dasharray: 8 6; animation: dash 3s linear infinite; }
+  .wave path.g { stroke: var(--green); filter: drop-shadow(0 0 4px var(--green)); }
+  .wave path.b { stroke: var(--blue); filter: drop-shadow(0 0 4px var(--blue)); animation-direction: reverse; }
+  @keyframes dash { to { stroke-dashoffset: -56; } }
+
+  section { margin: 0 0 2.6em; }
+  h2 {
+    margin: 0 0 .7em;
+    font-size: 1.05rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--blue);
+    text-shadow: 0 0 8px rgba(30,144,255,.6);
+  }
+  h2::before { content: "> "; color: var(--green); }
+  p { margin: 0 0 1em; color: #9be08b; }
+  p strong { color: var(--green); font-weight: normal; text-shadow: 0 0 6px rgba(57,255,20,.5); }
+  code { color: var(--green); background: rgba(0,40,0,.5); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; font-size: .92em; }
+
+  .box {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    background: rgba(0,20,0,.45);
+  }
+  .box::before, .box::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--blue); }
+  .box::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .box::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid .box h3 { margin: 0 0 .3em; font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); font-weight: normal; }
+  .grid .box p { margin: 0; font-size: .85rem; }
+
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--blue); font-weight: normal; letter-spacing: .15em; text-transform: uppercase; font-size: .72rem; border-bottom: 1px solid var(--green-dim); }
+  td:first-child { white-space: nowrap; }
+  td { color: #9be08b; }
+  tr:hover td { background: rgba(30,144,255,.07); }
+
+  ol.steps { margin: 0; padding-left: 1.4em; color: #9be08b; }
+  ol.steps li { margin: 0 0 .7em; padding-left: .3em; }
+  ol.steps li::marker { color: var(--blue); }
+  ol.steps strong { color: var(--green); font-weight: normal; }
+
+  pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    background: rgba(0,12,0,.8);
+    border: 1px solid var(--green-dim);
+    border-left: 3px solid var(--blue);
+    border-radius: 3px;
+    color: var(--green);
+    font-size: .85rem;
+    line-height: 1.6;
+  }
+  pre .c { color: var(--grey); }
+
+  .tags { display: grid; gap: 6px 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: .85rem; color: #9be08b; }
+  .tags b { color: var(--blue); font-weight: normal; display: inline-block; min-width: 5.2em; }
+
+  ul.plain { margin: 0; padding-left: 1.2em; color: #9be08b; }
+  ul.plain li { margin: 0 0 .6em; }
+  ul.plain li::marker { color: var(--blue); }
+
+  .timeline { border-left: 2px solid var(--green-dim); margin: 0; padding: 0 0 0 18px; list-style: none; }
+  .timeline li { position: relative; margin: 0 0 1em; color: #9be08b; font-size: .88rem; }
+  .timeline li::before { content: ""; position: absolute; left: -24px; top: .55em; width: 10px; height: 10px; background: var(--bg); border: 2px solid var(--blue); border-radius: 50%; }
+  .timeline li:first-child::before { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+  .timeline b { color: var(--blue); font-weight: normal; letter-spacing: .1em; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1em; }
+  .btn {
+    display: inline-block; padding: 10px 18px; text-decoration: none;
+    border: 1px solid var(--green-dim); border-radius: 3px; background: rgba(0,20,0,.45);
+    color: var(--green); font-size: .85rem; letter-spacing: .12em; text-transform: uppercase;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .btn:hover, .btn:focus-visible { border-color: var(--blue); color: var(--blue); box-shadow: 0 0 16px rgba(30,144,255,.5); transform: translateY(-2px); }
+  .btn.primary { border-color: var(--blue); color: var(--blue); }
+
+  footer { margin-top: 3em; text-align: center; color: var(--green-dim); font-size: .8rem; letter-spacing: .2em; }
+  footer b { color: var(--blue); font-weight: normal; }
+
+  @media (max-width: 640px) {
+    .grid, .tags { grid-template-columns: 1fr; }
+    main { padding: 20px 14px 30px; }
+    td:first-child { white-space: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  /* hosting guide additions */
+  h3 { margin: 1.4em 0 .5em; font-size: .85rem; font-weight: normal; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); }
+  h2 + h3 { margin-top: 0; }
+  h1 { font-size: clamp(2rem, 7.2vw, 4rem); letter-spacing: .08em; }
+  em { color: #c9f0bd; }
+  .box + .box, .box + p, .code + p, .code + .code, .box + .code, .code + .box, ul.plain + .code, ol.steps + p { margin-top: 1em; }
+  p + .code, p + .box, h3 + .code, h3 + .box { margin-top: .2em; }
+  .box.note { border-color: #8a6d12; background: rgba(40,30,0,.4); }
+  .box.note p { color: #e3cf86; }
+  .code { position: relative; margin-bottom: 1em; }
+  .code pre { padding-top: 22px; }
+  .code .lang { position: absolute; left: 10px; top: 3px; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--green-dim); }
+  .code .copy {
+    position: absolute; right: 8px; top: 6px; display: none;
+    font: inherit; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    background: rgba(0,20,0,.7); color: var(--green); border: 1px solid var(--green-dim); border-radius: 3px; padding: 2px 9px; cursor: pointer;
+  }
+  html.js .code .copy { display: block; }
+  .code .copy:hover, .code .copy:focus-visible { border-color: var(--blue); color: var(--blue); outline: none; box-shadow: 0 0 10px rgba(30,144,255,.5); }
+  .code .copy.done { border-color: var(--green); color: #000; background: var(--green); }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  p code, li code, td code { word-break: break-word; }
+  .toc { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: .85rem; }
+  .toc a { text-decoration: none; display: block; padding: 3px 0; color: #9be08b; }
+  .toc a:hover, .toc a:focus-visible { color: var(--blue); }
+  .toc a::before { content: "> "; color: var(--green); }
+  ul.checklist { list-style: none; padding-left: 0; }
+  ul.checklist li.chk { position: relative; padding-left: 1.7em; }
+  ul.checklist li.chk::before { content: ""; position: absolute; left: 0; top: .42em; width: 11px; height: 11px; border: 1px solid var(--blue); border-radius: 2px; }
+  td, th { word-break: break-word; }
+  td:first-child { white-space: normal; }
+  @media (max-width: 640px) { .toc { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+
+  <a class="back" href="/projects/">&lt; PROJECTS</a>
+
+  <header class="hero">
+    <h1>HOSTING GUIDE</h1>
+    <p class="sub">// host your own site at home //</p>
+    <p class="tagline">Your site. Your PC. No open ports.<span class="cursor" aria-hidden="true"></span></p>
+    <ul class="badges">
+      <li>server <b>Debian 13</b></li>
+      <li>web <b>nginx</b></li>
+      <li>access <b>Cloudflare Tunnel</b></li>
+      <li>license <b>CC BY-SA 4.0</b></li>
+    </ul>
+  </header>
+
+  <svg class="wave" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path class="g" d="M0 30 Q 25 0 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30 T 650 30 T 700 30 T 750 30 T 800 30"/>
+    <path class="b" d="M0 30 Q 12 60 25 30 T 50 30 T 75 30 T 100 30 T 125 30 T 150 30 T 175 30 T 200 30 T 225 30 T 250 30 T 275 30 T 300 30 T 325 30 T 350 30 T 375 30 T 400 30 T 425 30 T 450 30 T 475 30 T 500 30 T 525 30 T 550 30 T 575 30 T 600 30 T 625 30 T 650 30 T 675 30 T 700 30 T 725 30 T 750 30 T 775 30 T 800 30"/>
+  </svg>
+
+  <nav id="contents" aria-label="Contents">
+    <h2>Contents</h2>
+    <div class="box"><ul class="toc"><li><a href="#s0">0. What you need</a></li><li><a href="#s1">1. Prepare the server</a></li><li><a href="#s2">2. Your site files and the web root</a></li><li><a href="#s3">3. nginx: serve the site on localhost only</a></li><li><a href="#s4">4. Put the domain on Cloudflare and create the tunnel</a></li><li><a href="#s5">5. Firewall</a></li><li><a href="#s6">6. SSH: key first, then close the password door</a></li><li><a href="#s7">7. Automatic security updates</a></li><li><a href="#s8">8. Updating the site: one command</a></li><li><a href="#s9">9. nginx hardening (optional but cheap)</a></li><li><a href="#s10">10. Know when it breaks: an uptime check</a></li><li><a href="#s11">11. Private tools: keep them behind a login</a></li><li><a href="#s12">12. Back it up (do this before you need it)</a></li><li><a href="#s13">13. GitHub, the practical bits</a></li><li><a href="#s14">14. The final test: reboot</a></li><li><a href="#checklist">Checklist</a></li><li><a href="#mistakes-we-actually-made">Mistakes we actually made (so you can skip them)</a></li><li><a href="#good-habits">Good habits</a></li></ul></div>
+  </nav>
+  <div style="height:2.2em"></div>
+
+  <section id="about">
+    <h2>About this guide</h2>
+      <div class="box"><p style="margin:0">Written from the real setup of www.9a3why.space (a static amateur-radio site served from a small Linux PC at home). Unofficial: it describes one working way, not the only way. Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic. License: CC BY-SA 4.0.</p></div>
+      <h3>What you will end up with</h3>
+      <ul class="plain"><li>A website on your own domain, served from a computer in your home</li><li>No open ports on your router and your home IP address not exposed to visitors</li><li>A firewall, automatic security updates, an uptime alert, and a repeatable "update the site" command</li><li>Your site files in a git repository, so nothing lives only on one machine</li></ul>
+      <h3>How it fits together</h3>
+      <div class="code"><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>visitor
+-&gt; Cloudflare (HTTPS and caching)
+-&gt; encrypted tunnel (your computer connects OUT to Cloudflare)
+-&gt; cloudflared (small program on your computer)
+-&gt; nginx (web server, listens on 127.0.0.1:80 only)
+-&gt; /var/www/yoursite (your files)</code></pre></div>
+      <p>Your PC makes an <em>outbound</em> connection to Cloudflare, so you do not open or forward any port on the router.</p>
+      <p><strong>Placeholders used below.</strong> Replace them with your own values and never paste them literally: <code>example.com</code> (your domain), <code>youruser</code> (your Linux user), <code>yoursite</code> (a folder name), <code>192.168.1.0/24</code> (your home network, check yours with <code>ip -4 addr</code>).</p>
+  </section>
+
+  <section id="s0">
+    <h2>0. What you need</h2>
+      <div class="box tablewrap"><table><thead><tr><th>Item</th><th>Notes</th></tr></thead><tbody><tr><td>A computer that can run 24/7</td><td>An old PC, a mini PC or a Raspberry Pi 4/5 is plenty for a static site</td></tr><tr><td>Linux</td><td>These steps use <strong>Debian</strong> (13 "trixie"); Ubuntu is nearly identical</td></tr><tr><td>A domain name</td><td>About 10-15 EUR/year from any registrar</td></tr><tr><td>A free Cloudflare account</td><td>Provides DNS, HTTPS, caching and the tunnel</td></tr><tr><td>A GitHub account</td><td>Optional but recommended, for the site repository (private is fine)</td></tr><tr><td>A free healthchecks.io account</td><td>Optional, for "your site is down" alerts</td></tr></tbody></table></div>
+      <p>You need a normal home internet connection. <strong>No static IP and no router changes are needed.</strong> Check your internet provider's terms about running servers at home; a small static site is usually fine.</p>
+  </section>
+
+  <section id="s1">
+    <h2>1. Prepare the server</h2>
+      <p>Install Debian (a minimal install with "SSH server" and "standard utilities" is enough), then:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo apt install -y nginx git curl ufw unattended-upgrades</code></pre></div>
+      <p>Give the machine a fixed address on your home network (a "DHCP reservation" in your router's settings is the easiest way) so it does not change.</p>
+  </section>
+
+  <section id="s2">
+    <h2>2. Your site files and the web root</h2>
+      <p>Keep two separate folders:</p>
+      <ul class="plain"><li>the <strong>git repository</strong> where you edit: <code>~/yoursite</code></li><li>the <strong>web root</strong> that nginx serves: <code>/var/www/yoursite</code></li></ul>
+      <p>Keeping them separate means a mistake in the repository (a stray file, a draft) is never public. Updates are an explicit copy step (section 8).</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>mkdir -p ~/yoursite &amp;&amp; cd ~/yoursite
+git init -b main
+printf '&lt;!doctype html&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;h1&gt;It works&lt;/h1&gt;\n' &gt; index.html
+sudo mkdir -p /var/www/yoursite
+sudo cp index.html /var/www/yoursite/
+sudo chmod -R a+rX /var/www/yoursite</code></pre></div>
+      <p><code>chmod -R a+rX</code> matters: if nginx cannot read a file you get a 403, and it is the most common beginner problem.</p>
+  </section>
+
+  <section id="s3">
+    <h2>3. nginx: serve the site on localhost only</h2>
+      <p>Create <code>/etc/nginx/sites-available/yoursite</code>:</p>
+      <div class="code"><span class="lang">nginx</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>server {
+    listen 127.0.0.1:80 default_server;
+    server_name _;
+
+    root /var/www/yoursite;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}</code></pre></div>
+      <p>Enable it, disable the default page, test, reload:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo ln -s /etc/nginx/sites-available/yoursite /etc/nginx/sites-enabled/yoursite
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+curl -s http://127.0.0.1/ | head -3</code></pre></div>
+      <p><code>listen 127.0.0.1:80</code> means nginx accepts connections <strong>only from the machine itself</strong>. The tunnel (next section) is the only way in from the internet.</p>
+  </section>
+
+  <section id="s4">
+    <h2>4. Put the domain on Cloudflare and create the tunnel</h2>
+      <ol class="steps"><li>In Cloudflare, <strong>add your domain</strong> and follow the instructions to change the nameservers at your registrar. Wait until Cloudflare shows the domain as active.</li><li>In the Cloudflare dashboard open <strong>Zero Trust</strong> (the "Cloudflare One" section) and go to <strong>Networks -&gt; Tunnels -&gt; Create a tunnel</strong>, type <strong>Cloudflared</strong>. Menu names change from time to time; look for "Tunnels".</li><li>Name it (for example <code>home-server</code>). Choose <strong>Debian</strong>, <strong>64-bit</strong> and copy the install commands the dashboard shows. Run them on your server. They add Cloudflare's package repository, install <code>cloudflared</code> and register it as a service with a token.</li><li>Add a <strong>public hostname</strong>: subdomain <code>www</code> (and a second one with an empty subdomain for the bare domain), domain <code>example.com</code>, service type <strong>HTTP</strong>, URL <code>localhost:80</code>. Cloudflare creates the DNS records for you.</li></ol>
+      <p>Check that the service runs and survives reboots:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>systemctl is-enabled cloudflared &amp;&amp; systemctl is-active cloudflared</code></pre></div>
+      <p>Then open <code>https://www.example.com</code>. You should see your test page with a valid HTTPS certificate, without having touched your router.</p>
+      <p><strong>Make the tunnel start reliably after a reboot.</strong> Add an override so it waits for the network and restarts itself:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo systemctl edit cloudflared</code></pre></div>
+      <div class="code"><span class="lang">ini</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>[Unit]
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+RestartSec=10</code></pre></div>
+      <p>Save, then <code>sudo systemctl restart cloudflared</code>.</p>
+      <p><em>Treat the tunnel token like a password.</em> It is the key to your tunnel; never put it in a git repository or a screenshot.</p>
+  </section>
+
+  <section id="s5">
+    <h2>5. Firewall</h2>
+      <p>Because nothing needs to reach your server from outside, the firewall can block all incoming traffic:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo ufw default deny incoming
+sudo ufw default allow outgoing</code></pre></div>
+      <p>If you want to log in over SSH from another computer <strong>in your home network</strong>, allow it from the home network only, <em>before</em> enabling the firewall:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp
+sudo ufw enable
+sudo ufw status verbose</code></pre></div>
+      <p>If you only ever work at the machine's own keyboard, skip the SSH rule and switch SSH off completely (next section).</p>
+  </section>
+
+  <section id="s6">
+    <h2>6. SSH: key first, then close the password door</h2>
+      <p><strong>Never turn password login off before a key works</strong>, or you lock yourself out. Order matters.</p>
+      <p>On your own computer (not the server):</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>ssh-keygen -t ed25519 -C "my-laptop"     <span class="c"> # choose a passphrase</span>
+ssh-copy-id youruser@server-address
+ssh -o PasswordAuthentication=no youruser@server-address echo KEY_OK</code></pre></div>
+      <p>Only when that prints <code>KEY_OK</code> (and does not ask for the account password), on the server:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo tee /etc/ssh/sshd_config.d/00-hardening.conf &gt;/dev/null &lt;&lt;'EOF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+EOF
+sudo sshd -t &amp;&amp; sudo systemctl reload ssh
+sudo sshd -T | grep -Ei "^(passwordauthentication|permitrootlogin)"</code></pre></div>
+      <p>Keep your current SSH window open and test a <strong>new</strong> login before you close it. The file name starts with <code>00-</code> so it is read first; sshd uses the first value it finds. Check the real state with <code>sshd -T</code>, not just the config file: another file may override your setting. (This was exactly our experience: we believed password login was off and it was not.)</p>
+      <p><strong>If you do not use SSH at all</strong>, turn it off:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo systemctl disable --now ssh ssh.socket
+sudo ss -ltn | grep -E ":22\b" || echo "port 22 closed"</code></pre></div>
+  </section>
+
+  <section id="s7">
+    <h2>7. Automatic security updates</h2>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo apt install -y unattended-upgrades
+sudo tee /etc/apt/apt.conf.d/20auto-upgrades &gt;/dev/null &lt;&lt;'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+sudo systemctl enable --now unattended-upgrades
+sudo unattended-upgrade --dry-run 2&gt;&amp;1 | tail -5</code></pre></div>
+      <p>This installs <strong>security updates only</strong> and does not reboot by itself. Reboot manually about once a month (<code>/var/run/reboot-required</code> tells you when one is needed). Software from third-party repositories (such as <code>cloudflared</code>) is not covered; update it now and then with <code>sudo apt update &amp;&amp; sudo apt upgrade</code>.</p>
+  </section>
+
+  <section id="s8">
+    <h2>8. Updating the site: one command</h2>
+      <p>Keep this script as <code>scripts/deploy.sh</code> in your repository:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>#!/usr/bin/env bash
+set -euo pipefail
+WEB=/var/www/yoursite
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &amp;&amp; pwd)"
+cd "$REPO"
+if [[ "${1:-}" == "--pull" ]]; then git pull --ff-only; fi
+
+<span class="c"># publish ONLY what visitors should see (list your own files and folders)</span>
+sudo cp -r index.html "$WEB"/
+sudo chmod -R a+rX "$WEB"
+
+code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/ || true)
+if [[ "$code" == 200 ]]; then echo "DEPLOY OK"; else echo "FAILED: HTTP $code"; exit 1; fi</code></pre></div>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>chmod +x scripts/deploy.sh
+scripts/deploy.sh</code></pre></div>
+      <p>Add more folders to the <code>cp</code> line as your site grows (<code>gallery</code>, <code>img</code>, ...). Do <strong>not</strong> publish <code>README.md</code>, <code>.git</code>, scripts or notes.</p>
+      <p>After a deploy, hard-refresh your browser (Ctrl+Shift+R). If you changed a CSS or JS file and the old one still shows, rename the file or add a version, e.g. <code>style.css?v=2</code>, and purge the Cloudflare cache (Caching -&gt; Configuration -&gt; Purge).</p>
+  </section>
+
+  <section id="s9">
+    <h2>9. nginx hardening (optional but cheap)</h2>
+      <p>Create <code>/etc/nginx/snippets/yoursite-hardening.conf</code>:</p>
+      <div class="code"><span class="lang">nginx</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>server_tokens off;
+
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+gzip on;
+gzip_vary on;
+gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+
+location ~* \.(webp|jpg|jpeg|png|svg|ico)$ {
+    expires 30d;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+}
+location ~ /\. { deny all; }</code></pre></div>
+      <p>Add this line inside your <code>server { }</code> block, then test <strong>before</strong> reloading, and keep a backup outside <code>sites-enabled</code>:</p>
+      <div class="code"><span class="lang">nginx</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>    include snippets/yoursite-hardening.conf;</code></pre></div>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo cp /etc/nginx/sites-enabled/yoursite ~/yoursite.nginx.bak
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+curl -sI http://127.0.0.1/ | grep -Ei "server:|x-content|x-frame"
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1/.git/config   <span class="c"> # 403 or 404, never 200</span></code></pre></div>
+      <p>(<code>add_header</code> lines are repeated inside the <code>location</code> blocks because nginx does not inherit them once a location defines its own.)</p>
+  </section>
+
+  <section id="s10">
+    <h2>10. Know when it breaks: an uptime check</h2>
+      <p>On healthchecks.io create a check with a 5-minute period and a grace time of about 10 minutes. Copy its <strong>ping URL</strong>. Then:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>mkdir -p ~/bin
+cat &gt; ~/bin/healthcheck.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+<span class="c"># ping only if the local site answers AND the services run</span>
+curl -fsS -m 5 -o /dev/null http://127.0.0.1/ || exit 1
+for s in nginx cloudflared; do systemctl is-active --quiet "$s" || exit 1; done
+curl -fsS -m 10 --retry 3 -o /dev/null "PASTE-YOUR-PING-URL-HERE"
+EOF
+chmod 700 ~/bin/healthcheck.sh
+( crontab -l 2&gt;/dev/null; echo '*/5 * * * * /home/youruser/bin/healthcheck.sh' ) | crontab -</code></pre></div>
+      <p>Replace the placeholder text inside the script with your real ping URL <strong>in the script file only</strong>. It must never go into git. If the machine or tunnel goes down, the pings stop and healthchecks.io emails you.</p>
+  </section>
+
+  <section id="s11">
+    <h2>11. Private tools: keep them behind a login</h2>
+      <p>If you also run a private web app (a dashboard, an AI chat, a monitoring page), do not just publish it. In Cloudflare <strong>Zero Trust -&gt; Access -&gt; Applications -&gt; Add -&gt; Self-hosted</strong>, enter its hostname and add a policy that allows only your email address (one-time PIN login). Visitors then get a login page before they can reach the app. Also change the app's own default password and turn off anonymous access.</p>
+  </section>
+
+  <section id="s12">
+    <h2>12. Back it up (do this before you need it)</h2>
+      <p>The 3-2-1 rule: <strong>3</strong> copies, on <strong>2</strong> kinds of storage, <strong>1</strong> off-site.</p>
+      <ul class="plain"><li>Copy 1: the working files on the server.</li><li>Copy 2: your <strong>git repository</strong> on GitHub (a private repo is fine). This protects the site itself.</li><li>Copy 3: an <strong>encrypted</strong> copy of server settings and app data in cloud storage (for example with <code>rclone</code> and its <code>crypt</code> remote), plus an occasional manual copy to a USB drive.</li></ul>
+      <p>Things worth saving besides the site: <code>/etc/nginx</code>, <code>/etc/cloudflared</code>, your cron jobs (<code>crontab -l</code>), your scripts, and the data of any apps you run. <strong>A backup you have never restored is only a hope.</strong> Do a test restore once.</p>
+      <p>Never commit secrets (<code>.env</code> files, tokens, keys, backups) to git. Start your repository with a <code>.gitignore</code> such as:</p>
+      <div class="code"><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>.env*
+*.pem
+*.key
+*.log
+*.db
+*.tgz
+*.tar.gz
+*.bak
+backups/
+*.zip</code></pre></div>
+  </section>
+
+  <section id="s13">
+    <h2>13. GitHub, the practical bits</h2>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>git config --global user.name  "Your Name"
+git config --global user.email "you@example.com"
+git remote add origin https://github.com/youraccount/yoursite.git
+git add -A &amp;&amp; git commit -m "First version"
+git push -u origin main</code></pre></div>
+      <p>GitHub does not accept your account password for <code>git push</code> over HTTPS. Create a <strong>personal access token</strong> (GitHub -&gt; Settings -&gt; Developer settings -&gt; Personal access tokens) and enter it when asked for the password. Tag your releases so you can always go back: <code>git tag -a v1.0.0 -m "Version 1.0.0" &amp;&amp; git push origin v1.0.0</code>.</p>
+  </section>
+
+  <section id="s14">
+    <h2>14. The final test: reboot</h2>
+      <p>A server that only works until the next reboot is not finished. When everything above is in place:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo reboot</code></pre></div>
+      <p>After it is back (give the tunnel a minute):</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>systemctl is-active nginx cloudflared ufw unattended-upgrades
+sudo ufw status | head -3
+curl -s -o /dev/null -w "local %{http_code}\n" http://127.0.0.1/
+curl -s -o /dev/null -w "public %{http_code}\n" https://www.example.com/</code></pre></div>
+      <p>Everything should say <code>active</code>, <code>Status: active</code> and <code>200</code>.</p>
+  </section>
+
+  <section id="checklist">
+    <h2>Checklist</h2>
+      <ul class="plain checklist"><li class="chk">nginx listens on <code>127.0.0.1</code> only; <code>sudo nginx -t</code> is clean</li><li class="chk">Domain is active on Cloudflare; tunnel runs and is enabled at boot; HTTPS works</li><li class="chk">No router port forwarding</li><li class="chk"><code>ufw</code> is active, default deny incoming</li><li class="chk">SSH: a key works <strong>before</strong> passwords are disabled (or SSH is switched off)</li><li class="chk">Unattended security updates are on; a monthly reboot is in your calendar</li><li class="chk">One-command deploy script; only public files are copied to the web root</li><li class="chk"><code>.git</code>, <code>README.md</code>, scripts and notes are <strong>not</strong> reachable from the web (403/404)</li><li class="chk">Uptime check is pinging; the ping URL and tunnel token are not in git</li><li class="chk">Private apps are behind Cloudflare Access</li><li class="chk">Repository on GitHub; at least one off-site (encrypted) backup, and a restore tested</li><li class="chk">A reboot test passed</li></ul>
+  </section>
+
+  <section id="mistakes-we-actually-made">
+    <h2>Mistakes we actually made (so you can skip them)</h2>
+      <div class="box tablewrap"><table><thead><tr><th>What happened</th><th>Lesson</th></tr></thead><tbody><tr><td>Pasted <code>PID 1234</code> or <code>&lt;your-file&gt;</code> literally into a command</td><td>Replace every placeholder before you run a command</td></tr><tr><td><code>cp: cannot stat 'index.html'</code></td><td>The files were not unpacked or you were in the wrong folder; run <code>ls</code> first</td></tr><tr><td>A long block of commands ran after the first one failed</td><td>Join steps with <code>&amp;&amp;</code> so the chain stops at the first error</td></tr><tr><td>"Author identity unknown" on the first <code>git commit</code></td><td>Set <code>user.name</code> and <code>user.email</code> once (section 13)</td></tr><tr><td><code>git push</code> refused the account password</td><td>Use a personal access token</td></tr><tr><td>Gallery looked broken after an update</td><td>Old CSS/JS stayed cached against new HTML; rename the files or add <code>?v=N</code>, then purge the cache</td></tr><tr><td>Believed SSH was key-only when it was not</td><td>Check the effective setting with <code>sudo sshd -T</code>, and test with <code>-o PasswordAuthentication=no</code></td></tr><tr><td>Deploy check expected 404 for <code>.git</code> but got 403</td><td>After hardening, dotfiles return 403; both mean "not served"</td></tr><tr><td>A tag was pushed before the files were committed</td><td>Commit and push first, tag last</td></tr></tbody></table></div>
+  </section>
+
+  <section id="good-habits">
+    <h2>Good habits</h2>
+      <ul class="plain"><li>Change one thing at a time, test, then continue. Keep a backup of any config before you edit it (store it <strong>outside</strong> the folder nginx reads).</li><li>Write down what you changed. A short <code>README.md</code> and a changelog in your repository save hours later.</li><li>Keep secrets out of screenshots, chats and git. If one leaks, replace it (new token, new ping URL, new password) rather than hoping.</li><li>Photos and personal content: decide your license deliberately. Creative Commons licenses cannot be revoked once others used the material.</li></ul>
+      <div class="box note"><p style="margin:0">Disclaimer: this is an unofficial hobby guide with no warranty. You are responsible for your own server, your data and your compliance with your internet provider's terms and local law.</p></div>
+  </section>
+
+  <footer>
+    <b>9A3WHY</b> &middot; QRV &middot; 73 DE 9A3WHY &middot; <a href="/privacy/">privacy</a> &middot; <a href="/terms/">terms</a>
+  </footer>
+
+</main>
+<script>
+(function () {
+  if (!navigator.clipboard) { document.documentElement.className = document.documentElement.className.replace(" js", ""); return; }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest(".copy") : null;
+    if (!b) return;
+    var code = b.parentNode.querySelector("pre code");
+    navigator.clipboard.writeText(code.textContent.replace(/\n$/, "") + "\n").then(function () {
+      b.textContent = "Copied"; b.classList.add("done");
+      setTimeout(function () { b.textContent = "Copy"; b.classList.remove("done"); }, 1600);
+    }, function () { b.textContent = "Select + Ctrl+C"; });
+  });
+})();
+</script>
+</body>
+</html>

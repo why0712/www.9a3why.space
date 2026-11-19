@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="PINGBOT - MeshBot 9A3WHY, a Python ping bot for Meshtastic radios with automated PONG replies, system commands and easter eggs.">
+<title>PINGBOT - 9A3WHY</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ctext x='8' y='44' fill='%2339ff14' font-family='monospace' font-size='30' font-weight='700'%3E%3E_%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #000;
+    --green: #39ff14;
+    --green-dim: #1a8f0a;
+    --blue: #1e90ff;
+    --blue-glow: #00bfff;
+    --grey: #8b9399;
+    --line: #1d2a1a;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: var(--mono);
+    line-height: 1.65;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(rgba(57,255,20,.05) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(30,144,255,.05) 1px, transparent 1px) 0 0 / 40px 40px;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.35) 3px);
+    pointer-events: none;
+    z-index: 10;
+  }
+  main {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+  a { color: var(--blue); }
+  a:hover, a:focus-visible { color: var(--green); outline: none; }
+
+  .back { display: inline-block; text-decoration: none; font-size: .85rem; letter-spacing: .2em; text-shadow: 0 0 6px var(--blue); }
+
+  .hero { text-align: center; padding: 30px 0 6px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.8rem, 11vw, 6rem);
+    letter-spacing: .1em;
+    color: var(--blue);
+    text-shadow: 0 0 8px var(--blue), 0 0 24px var(--blue-glow), 0 0 48px rgba(0,191,255,.5);
+    animation: flicker 6s infinite;
+  }
+  @keyframes flicker { 0%,92%,100%{opacity:1} 93%{opacity:.75} 95%{opacity:1} 97%{opacity:.85} }
+  .sub { margin: .2em 0 1.6em; color: var(--green-dim); letter-spacing: .3em; font-size: .85rem; text-transform: uppercase; }
+  .tagline { font-size: clamp(1.05rem, 3.4vw, 1.5rem); text-shadow: 0 0 6px rgba(57,255,20,.7), 0 0 18px rgba(57,255,20,.35); margin: 0 0 1em; }
+  .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; margin-left: .2em; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 1.6em; padding: 0; list-style: none; }
+  .badges li { border: 1px solid var(--green-dim); border-radius: 3px; padding: 3px 10px; font-size: .72rem; letter-spacing: .15em; text-transform: uppercase; background: rgba(0,20,0,.45); }
+  .badges li b { color: var(--blue); font-weight: normal; }
+
+  .wave { width: 100%; height: 50px; margin: 0 0 1.4em; }
+  .wave path { fill: none; stroke-width: 2; stroke-dasharray: 8 6; animation: dash 3s linear infinite; }
+  .wave path.g { stroke: var(--green); filter: drop-shadow(0 0 4px var(--green)); }
+  .wave path.b { stroke: var(--blue); filter: drop-shadow(0 0 4px var(--blue)); animation-direction: reverse; }
+  @keyframes dash { to { stroke-dashoffset: -56; } }
+
+  section { margin: 0 0 2.6em; }
+  h2 {
+    margin: 0 0 .7em;
+    font-size: 1.05rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--blue);
+    text-shadow: 0 0 8px rgba(30,144,255,.6);
+  }
+  h2::before { content: "> "; color: var(--green); }
+  p { margin: 0 0 1em; color: #9be08b; }
+  p strong { color: var(--green); font-weight: normal; text-shadow: 0 0 6px rgba(57,255,20,.5); }
+  code { color: var(--green); background: rgba(0,40,0,.5); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; font-size: .92em; }
+
+  .box {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    background: rgba(0,20,0,.45);
+  }
+  .box::before, .box::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--blue); }
+  .box::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .box::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid .box h3 { margin: 0 0 .3em; font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); font-weight: normal; }
+  .grid .box p { margin: 0; font-size: .85rem; }
+
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--blue); font-weight: normal; letter-spacing: .15em; text-transform: uppercase; font-size: .72rem; border-bottom: 1px solid var(--green-dim); }
+  td:first-child { white-space: nowrap; }
+  td { color: #9be08b; }
+  tr:hover td { background: rgba(30,144,255,.07); }
+
+  ol.steps { margin: 0; padding-left: 1.4em; color: #9be08b; }
+  ol.steps li { margin: 0 0 .7em; padding-left: .3em; }
+  ol.steps li::marker { color: var(--blue); }
+  ol.steps strong { color: var(--green); font-weight: normal; }
+
+  pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    background: rgba(0,12,0,.8);
+    border: 1px solid var(--green-dim);
+    border-left: 3px solid var(--blue);
+    border-radius: 3px;
+    color: var(--green);
+    font-size: .85rem;
+    line-height: 1.6;
+  }
+  pre .c { color: var(--grey); }
+
+  .tags { display: grid; gap: 6px 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: .85rem; color: #9be08b; }
+  .tags b { color: var(--blue); font-weight: normal; display: inline-block; min-width: 5.2em; }
+
+  ul.plain { margin: 0; padding-left: 1.2em; color: #9be08b; }
+  ul.plain li { margin: 0 0 .6em; }
+  ul.plain li::marker { color: var(--blue); }
+
+  .timeline { border-left: 2px solid var(--green-dim); margin: 0; padding: 0 0 0 18px; list-style: none; }
+  .timeline li { position: relative; margin: 0 0 1em; color: #9be08b; font-size: .88rem; }
+  .timeline li::before { content: ""; position: absolute; left: -24px; top: .55em; width: 10px; height: 10px; background: var(--bg); border: 2px solid var(--blue); border-radius: 50%; }
+  .timeline li:first-child::before { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+  .timeline b { color: var(--blue); font-weight: normal; letter-spacing: .1em; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1em; }
+  .btn {
+    display: inline-block; padding: 10px 18px; text-decoration: none;
+    border: 1px solid var(--green-dim); border-radius: 3px; background: rgba(0,20,0,.45);
+    color: var(--green); font-size: .85rem; letter-spacing: .12em; text-transform: uppercase;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .btn:hover, .btn:focus-visible { border-color: var(--blue); color: var(--blue); box-shadow: 0 0 16px rgba(30,144,255,.5); transform: translateY(-2px); }
+  .btn.primary { border-color: var(--blue); color: var(--blue); }
+
+  footer { margin-top: 3em; text-align: center; color: var(--green-dim); font-size: .8rem; letter-spacing: .2em; }
+  footer b { color: var(--blue); font-weight: normal; }
+
+  @media (max-width: 640px) {
+    .grid, .tags { grid-template-columns: 1fr; }
+    main { padding: 20px 14px 30px; }
+    td:first-child { white-space: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+
+  <a class="back" href="/projects/">&lt; PROJECTS</a>
+
+  <header class="hero">
+    <h1>PINGBOT</h1>
+    <p class="sub">// meshtastic ping bot //</p>
+    <p class="tagline">Hack the mesh. Not the spectrum.<span class="cursor" aria-hidden="true"></span></p>
+    <ul class="badges">
+      <li>MeshBot <b>9A3WHY</b></li>
+      <li>version <b>2.0.0-beta</b></li>
+      <li>Python <b>3.10+</b></li>
+      <li>license <b>CC BY-SA 4.0</b></li>
+    </ul>
+  </header>
+
+  <svg class="wave" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path class="g" d="M0 30 Q 25 0 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30 T 650 30 T 700 30 T 750 30 T 800 30"/>
+    <path class="b" d="M0 30 Q 12 60 25 30 T 50 30 T 75 30 T 100 30 T 125 30 T 150 30 T 175 30 T 200 30 T 225 30 T 250 30 T 275 30 T 300 30 T 325 30 T 350 30 T 375 30 T 400 30 T 425 30 T 450 30 T 475 30 T 500 30 T 525 30 T 550 30 T 575 30 T 600 30 T 625 30 T 650 30 T 675 30 T 700 30 T 725 30 T 750 30 T 775 30 T 800 30"/>
+  </svg>
+
+  <section id="about">
+    <h2>About</h2>
+    <div class="box">
+      <p>PINGBOT is a small, working <strong>ping bot for Meshtastic</strong>. A Meshtastic radio is plugged into a Linux machine over USB, and the bot listens for text messages on the mesh. Send it <code>ping</code> and it answers with an automated <strong>PONG</strong> that includes the signal quality it received your message with (RSSI and SNR).</p>
+      <p style="margin:0">It also answers <code>help</code> and <code>info</code>, reports system and mesh status, lists the nodes it heard last, rolls dice, tells jokes &mdash; and has a few easter eggs, including a hidden text adventure for those who go looking.</p>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/why0712/meshtastic.ping.bot" target="_blank" rel="noopener">View on GitHub</a>
+      <a class="btn" href="https://github.com/why0712/meshtastic.ping.bot/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="box"><h3>USB auto-detect</h3><p>Finds the radio by itself, via <code>/dev/serial/by-id</code> with fallback to <code>ttyACM*</code> and <code>ttyUSB*</code>.</p></div>
+      <div class="box"><h3>Auto-reconnect</h3><p>If the radio drops out, the bot retries with exponential backoff, from 5 s up to 60 s, until it is back.</p></div>
+      <div class="box"><h3>Delivery confirmation</h3><p>Replies request an ACK, and the log shows whether the mesh confirmed delivery or why it failed.</p></div>
+      <div class="box"><h3>Private replies</h3><p>Every answer goes back as a direct message, including PKI-encrypted DMs.</p></div>
+      <div class="box"><h3>Signal diagnostics</h3><p><code>ping</code> returns the RSSI and SNR of your message as the bot received it.</p></div>
+      <div class="box"><h3>Monitoring and stats</h3><p>System status, mesh node count, last-heard nodes and usage statistics, all by text command.</p></div>
+      <div class="box"><h3>Rotating logs</h3><p>Tagged console and file logging, rotated at 2 MB with five backups.</p></div>
+      <div class="box"><h3>Lightweight</h3><p>One Python file, minimal dependencies, and bad packets are logged instead of crashing the bot.</p></div>
+    </div>
+  </section>
+
+  <section id="commands">
+    <h2>Commands</h2>
+    <p>Send these to the bot node as a text message. The leading <code>!</code> is optional and case does not matter.</p>
+    <div class="box tablewrap">
+      <table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>help</code> <code>cmd</code> <code>?</code></td><td>Lists the available commands</td></tr>
+          <tr><td><code>info</code></td><td>Bot version, website and callsign</td></tr>
+          <tr><td><code>ping</code></td><td>PONG with the RSSI and SNR of your message</td></tr>
+          <tr><td><code>time</code></td><td>Current date and time on the bot host</td></tr>
+          <tr><td><code>uptime</code></td><td>How long the host system has been running</td></tr>
+          <tr><td><code>nodes</code></td><td>How many mesh nodes the radio knows about</td></tr>
+          <tr><td><code>monitor</code></td><td>Bot, mesh and system report: uptime, nodes, RAM, load, CPU temperature, disk, last packet, packet and reply counts</td></tr>
+          <tr><td><code>stats</code></td><td>Usage statistics: messages, replies, top command, top node</td></tr>
+          <tr><td><code>lastheard</code></td><td>The five most recently heard nodes</td></tr>
+          <tr><td><code>dice</code> <code>coin</code></td><td>Roll a six-sided die, flip a coin</td></tr>
+          <tr><td><code>fortune</code> <code>joke</code></td><td>A random fortune-cookie line or one-liner</td></tr>
+          <tr><td><code>quote</code> <code>motd</code></td><td>A random line from the MeshBot log, and the message of the day</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1em">There is more in there than <code>help</code> lists. Poke around and see what answers back.</p>
+  </section>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Connect.</strong> The bot builds a list of serial ports, tries them in turn, and reads its own node ID from the radio. If nothing connects, it keeps retrying.</li>
+      <li><strong>Listen.</strong> It subscribes to incoming mesh packets and handles text messages only. Its own messages are ignored, and other packet types are just counted for the stats.</li>
+      <li><strong>Route.</strong> Each message goes to the command handler, unless that sender has a game running, in which case the game takes it.</li>
+      <li><strong>Reply.</strong> The answer is sent as a direct message back to the sender, even if the command came in on a channel. This keeps PKI-encrypted DMs decoding correctly on the other end.</li>
+      <li><strong>Confirm.</strong> Each reply asks for an ACK. The log records whether the mesh confirmed it or reported a failure reason.</li>
+      <li><strong>Recover.</strong> A lost connection or a serial error during sending closes the link and runs the connect loop again.</li>
+    </ol>
+  </section>
+
+  <section id="install">
+    <h2>Install</h2>
+    <p>Needs <strong>Python 3.10+</strong>, Linux (Debian, Ubuntu or Raspberry Pi OS) and a Meshtastic radio connected over USB serial. There is no TCP/network transport.</p>
+    <pre><span class="c"># get the code</span>
+git clone https://github.com/why0712/meshtastic.ping.bot.git
+cd meshtastic.ping.bot
+pip install -r requirements.txt
+
+<span class="c"># if the serial port is not accessible</span>
+sudo usermod -aG dialout $USER
+sudo systemctl stop ModemManager
+
+<span class="c"># run it</span>
+python3 pingbot.py</pre>
+  </section>
+
+  <section id="logging">
+    <h2>Logging</h2>
+    <p>Output goes to the console and to a rotating <code>meshbot.log</code> next to the script.</p>
+    <div class="box">
+      <div class="tags">
+        <div><b>[RX]</b> packet received</div>
+        <div><b>[CMD]</b> command parsed</div>
+        <div><b>[TX]</b> reply transmitted</div>
+        <div><b>[ACK]</b> delivered, or FAILED with a reason</div>
+        <div><b>[GAME]</b> simulation event</div>
+        <div><b>[SYSTEM]</b> startup, connect, reconnect</div>
+        <div><b>[ERROR]</b> system error</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="notes">
+    <h2>Good to know</h2>
+    <ul class="plain">
+      <li>Replies to a peer with a stale cached public key can fail with a <code>NO_CHANNEL</code> routing error.</li>
+      <li>The CPU temperature in <code>monitor</code> is read the Raspberry Pi way, so it may be missing on other hardware.</li>
+      <li>There is no <code>weather</code> command on purpose, because it would need internet access.</li>
+      <li>There is no built-in rate limit, so be considerate with the airtime.</li>
+    </ul>
+  </section>
+
+  <section id="history">
+    <h2>Version history</h2>
+    <ul class="timeline">
+      <li><b>v2.0.0-beta</b> &mdash; added <code>monitor</code>, <code>stats</code>, <code>lastheard</code> and the fun commands, reworked the hidden simulation, and moved to a single <code>pingbot.py</code> with versions tracked by git tags and the changelog.</li>
+      <li><b>v1.7.0-beta</b> &mdash; true ACK delivery confirmation, and a <code>!ping</code> formatting fix.</li>
+      <li><b>v1.6.0</b> &mdash; first ACK callback framework, replaced in 1.7.0.</li>
+      <li><b>v1.2.x</b> &mdash; USB auto-detection, auto-reconnect, rotating logs, and a fix for PKI-encrypted DM delivery.</li>
+      <li><b>v1.1.0</b> &mdash; first public release.</li>
+    </ul>
+  </section>
+
+  <section id="credits">
+    <h2>Credits and license</h2>
+    <div class="box">
+      <p>Created by <strong>9A3WHY</strong>, with contributions from <strong>9A3VEX</strong>.</p>
+      <p style="margin:0">Released under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">Creative Commons Attribution-ShareAlike 4.0</a>. Use it, change it, share it &mdash; keep the credit and share it under the same terms.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>9A3WHY</b> &middot; mesh all over the world &middot; 73 DE 9A3WHY &middot; <a href="/privacy/">privacy</a> &middot; <a href="/terms/">terms</a>
+  </footer>
+
+</main>
+</body>
+</html>

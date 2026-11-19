@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Focusrite PRO audio at Debian Trixie: setup and troubleshooting for Scarlett 2i2 Gen 1 and 8i6 with PipeWire and ALSA.">
+<title>FOCUSRITE - 9A3WHY</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ctext x='6' y='44' fill='%2339ff14' font-family='monospace' font-size='30' font-weight='700'%3E%3E%24%3C/text%3E%3C/svg%3E">
+<script>document.documentElement.className += " js";</script>
+<style>
+  :root {
+    --bg: #000;
+    --green: #39ff14;
+    --green-dim: #1a8f0a;
+    --blue: #1e90ff;
+    --blue-glow: #00bfff;
+    --grey: #8b9399;
+    --line: #1d2a1a;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: var(--mono);
+    line-height: 1.65;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(rgba(57,255,20,.05) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(30,144,255,.05) 1px, transparent 1px) 0 0 / 40px 40px;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.35) 3px);
+    pointer-events: none;
+    z-index: 10;
+  }
+  main {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+  a { color: var(--blue); }
+  a:hover, a:focus-visible { color: var(--green); outline: none; }
+
+  .back { display: inline-block; text-decoration: none; font-size: .85rem; letter-spacing: .2em; text-shadow: 0 0 6px var(--blue); }
+
+  .hero { text-align: center; padding: 30px 0 6px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.8rem, 11vw, 6rem);
+    letter-spacing: .1em;
+    color: var(--blue);
+    text-shadow: 0 0 8px var(--blue), 0 0 24px var(--blue-glow), 0 0 48px rgba(0,191,255,.5);
+    animation: flicker 6s infinite;
+  }
+  @keyframes flicker { 0%,92%,100%{opacity:1} 93%{opacity:.75} 95%{opacity:1} 97%{opacity:.85} }
+  .sub { margin: .2em 0 1.6em; color: var(--green-dim); letter-spacing: .3em; font-size: .85rem; text-transform: uppercase; }
+  .tagline { font-size: clamp(1.05rem, 3.4vw, 1.5rem); text-shadow: 0 0 6px rgba(57,255,20,.7), 0 0 18px rgba(57,255,20,.35); margin: 0 0 1em; }
+  .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; margin-left: .2em; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 1.6em; padding: 0; list-style: none; }
+  .badges li { border: 1px solid var(--green-dim); border-radius: 3px; padding: 3px 10px; font-size: .72rem; letter-spacing: .15em; text-transform: uppercase; background: rgba(0,20,0,.45); }
+  .badges li b { color: var(--blue); font-weight: normal; }
+
+  .wave { width: 100%; height: 50px; margin: 0 0 1.4em; }
+  .wave path { fill: none; stroke-width: 2; stroke-dasharray: 8 6; animation: dash 3s linear infinite; }
+  .wave path.g { stroke: var(--green); filter: drop-shadow(0 0 4px var(--green)); }
+  .wave path.b { stroke: var(--blue); filter: drop-shadow(0 0 4px var(--blue)); animation-direction: reverse; }
+  @keyframes dash { to { stroke-dashoffset: -56; } }
+
+  section { margin: 0 0 2.6em; }
+  h2 {
+    margin: 0 0 .7em;
+    font-size: 1.05rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--blue);
+    text-shadow: 0 0 8px rgba(30,144,255,.6);
+  }
+  h2::before { content: "> "; color: var(--green); }
+  p { margin: 0 0 1em; color: #9be08b; }
+  p strong { color: var(--green); font-weight: normal; text-shadow: 0 0 6px rgba(57,255,20,.5); }
+  code { color: var(--green); background: rgba(0,40,0,.5); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; font-size: .92em; }
+
+  .box {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    background: rgba(0,20,0,.45);
+  }
+  .box::before, .box::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--blue); }
+  .box::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .box::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid .box h3 { margin: 0 0 .3em; font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); font-weight: normal; }
+  .grid .box p { margin: 0; font-size: .85rem; }
+
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--blue); font-weight: normal; letter-spacing: .15em; text-transform: uppercase; font-size: .72rem; border-bottom: 1px solid var(--green-dim); }
+  td:first-child { white-space: nowrap; }
+  td { color: #9be08b; }
+  tr:hover td { background: rgba(30,144,255,.07); }
+
+  ol.steps { margin: 0; padding-left: 1.4em; color: #9be08b; }
+  ol.steps li { margin: 0 0 .7em; padding-left: .3em; }
+  ol.steps li::marker { color: var(--blue); }
+  ol.steps strong { color: var(--green); font-weight: normal; }
+
+  pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    background: rgba(0,12,0,.8);
+    border: 1px solid var(--green-dim);
+    border-left: 3px solid var(--blue);
+    border-radius: 3px;
+    color: var(--green);
+    font-size: .85rem;
+    line-height: 1.6;
+  }
+  pre .c { color: var(--grey); }
+
+  .tags { display: grid; gap: 6px 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: .85rem; color: #9be08b; }
+  .tags b { color: var(--blue); font-weight: normal; display: inline-block; min-width: 5.2em; }
+
+  ul.plain { margin: 0; padding-left: 1.2em; color: #9be08b; }
+  ul.plain li { margin: 0 0 .6em; }
+  ul.plain li::marker { color: var(--blue); }
+
+  .timeline { border-left: 2px solid var(--green-dim); margin: 0; padding: 0 0 0 18px; list-style: none; }
+  .timeline li { position: relative; margin: 0 0 1em; color: #9be08b; font-size: .88rem; }
+  .timeline li::before { content: ""; position: absolute; left: -24px; top: .55em; width: 10px; height: 10px; background: var(--bg); border: 2px solid var(--blue); border-radius: 50%; }
+  .timeline li:first-child::before { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+  .timeline b { color: var(--blue); font-weight: normal; letter-spacing: .1em; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1em; }
+  .btn {
+    display: inline-block; padding: 10px 18px; text-decoration: none;
+    border: 1px solid var(--green-dim); border-radius: 3px; background: rgba(0,20,0,.45);
+    color: var(--green); font-size: .85rem; letter-spacing: .12em; text-transform: uppercase;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .btn:hover, .btn:focus-visible { border-color: var(--blue); color: var(--blue); box-shadow: 0 0 16px rgba(30,144,255,.5); transform: translateY(-2px); }
+  .btn.primary { border-color: var(--blue); color: var(--blue); }
+
+  footer { margin-top: 3em; text-align: center; color: var(--green-dim); font-size: .8rem; letter-spacing: .2em; }
+  footer b { color: var(--blue); font-weight: normal; }
+
+  @media (max-width: 640px) {
+    .grid, .tags { grid-template-columns: 1fr; }
+    main { padding: 20px 14px 30px; }
+    td:first-child { white-space: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  /* focusrite page additions */
+  main a { overflow-wrap: anywhere; }
+  h3 { margin: 1.4em 0 .5em; font-size: .85rem; font-weight: normal; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); }
+  h2 + h3 { margin-top: 0; }
+  h1 { font-size: clamp(2rem, 7.2vw, 4rem); letter-spacing: .08em; }
+  em { color: #c9f0bd; }
+  .box + .box, .box + p, .code + p, .code + .code, .box + .code, .code + .box, ul.plain + .code, ol.steps + p { margin-top: 1em; }
+  p + .code, p + .box, h3 + .code, h3 + .box { margin-top: .2em; }
+  .box.note { border-color: #8a6d12; background: rgba(40,30,0,.4); }
+  .box.note p { color: #e3cf86; }
+  .code { position: relative; margin-bottom: 1em; }
+  .code pre { padding-top: 22px; }
+  .code .lang { position: absolute; left: 10px; top: 3px; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--green-dim); }
+  .code .copy {
+    position: absolute; right: 8px; top: 6px; display: none;
+    font: inherit; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    background: rgba(0,20,0,.7); color: var(--green); border: 1px solid var(--green-dim); border-radius: 3px; padding: 2px 9px; cursor: pointer;
+  }
+  html.js .code .copy { display: block; }
+  .code .copy:hover, .code .copy:focus-visible { border-color: var(--blue); color: var(--blue); outline: none; box-shadow: 0 0 10px rgba(30,144,255,.5); }
+  .code .copy.done { border-color: var(--green); color: #000; background: var(--green); }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  p code, li code, td code { word-break: break-word; }
+  .toc { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: .85rem; }
+  .toc a { text-decoration: none; display: block; padding: 3px 0; color: #9be08b; }
+  .toc a:hover, .toc a:focus-visible { color: var(--blue); }
+  .toc a::before { content: "> "; color: var(--green); }
+  ul.checklist { list-style: none; padding-left: 0; }
+  ul.checklist li.chk { position: relative; padding-left: 1.7em; }
+  ul.checklist li.chk::before { content: ""; position: absolute; left: 0; top: .42em; width: 11px; height: 11px; border: 1px solid var(--blue); border-radius: 2px; }
+  td, th { word-break: break-word; }
+  td:first-child { white-space: normal; }
+  @media (max-width: 640px) { .toc { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+
+  <a class="back" href="/projects/">&lt; PROJECTS</a>
+
+  <header class="hero">
+    <h1>FOCUSRITE</h1>
+    <p class="sub">// pro audio @ debian trixie //</p>
+    <p class="tagline">Class compliant. No driver to install.<span class="cursor" aria-hidden="true"></span></p>
+    <ul class="badges">
+      <li>os <b>Debian 13</b></li>
+      <li>audio <b>PipeWire + ALSA</b></li>
+      <li>devices <b>Scarlett 2i2 / 8i6</b></li>
+      <li>source <b>GitHub</b></li>
+    </ul>
+  </header>
+
+  <svg class="wave" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path class="g" d="M0 30 Q 25 0 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30 T 650 30 T 700 30 T 750 30 T 800 30"/>
+    <path class="b" d="M0 30 Q 12 60 25 30 T 50 30 T 75 30 T 100 30 T 125 30 T 150 30 T 175 30 T 200 30 T 225 30 T 250 30 T 275 30 T 300 30 T 325 30 T 350 30 T 375 30 T 400 30 T 425 30 T 450 30 T 475 30 T 500 30 T 525 30 T 550 30 T 575 30 T 600 30 T 625 30 T 650 30 T 675 30 T 700 30 T 725 30 T 750 30 T 775 30 T 800 30"/>
+  </svg>
+
+  <nav id="contents" aria-label="Contents">
+    <h2>Contents</h2>
+    <div class="box"><ul class="toc"><li><a href="#s1">1. Recommended desktop setup</a></li><li><a href="#s2">2. Identify the hardware</a></li><li><a href="#s3">3. If the device is not detected</a></li><li><a href="#s4">4. Direct ALSA test</a></li><li><a href="#s5">5. "Device or resource busy"</a></li><li><a href="#s6">6. Pick the Scarlett in PipeWire</a></li><li><a href="#s7">7. Scarlett 8i6: playback lag and the Pro Audio profile</a></li><li><a href="#s8">8. Scarlett 2i2 Gen 1: the kernel issue</a></li><li><a href="#s9">9. Scarlett 2i2 Gen 1: what you do NOT need</a></li><li><a href="#s10">10. Optional ~/.asoundrc</a></li><li><a href="#s11">11. Optional 96 kHz ALSA device</a></li><li><a href="#s12">12. Diagnostic bundle</a></li><li><a href="#s13">13. Troubleshooting order</a></li><li><a href="#s14">14. Quick recovery checklist</a></li><li><a href="#s15">15. Known open issue</a></li><li><a href="#s16">16. Get the guides</a></li></ul></div>
+  </nav>
+  <div style="height:2.2em"></div>
+
+  <section id="about">
+    <h2>About this project</h2>
+      <div class="box"><p style="margin:0">Setup and troubleshooting notes for Focusrite Scarlett USB interfaces on Debian 13 "Trixie": a Scarlett 2i2 (1st Gen) and a Scarlett 8i6, with PipeWire and plain ALSA. Unofficial: it describes what worked on my machines. Created by 9A3WHY with the assistance of Claude, an AI assistant by Anthropic. Source and PDF guides: <a href="https://github.com/why0712/focusrite.scarlett.pro.audio.trixie" target="_blank" rel="noopener">github.com/why0712/focusrite.scarlett.pro.audio.trixie</a></p></div>
+      <h3>In short</h3>
+      <ul class="plain"><li>Both interfaces are USB class compliant: the standard kernel driver <code>snd_usb_audio</code> is all you need</li><li>No proprietary Focusrite Linux driver, no Focusrite Control, no boot-time driver reload script</li><li>For the 2i2 Gen 1 the kernel version matters: a stock kernel can give distorted or silent audio</li><li>For the 8i6 the <strong>Pro Audio</strong> profile removed the lag when playback starts after silence</li></ul>
+      <p><strong>Read this first.</strong> The 8i6 and the 2i2 are different interfaces. Do not copy card numbers, channel counts, USB IDs, profiles or ALSA definitions from one model to the other. Always check the real hardware with <code>lsusb</code>, <code>aplay -l</code> and <code>/proc/asound/cards</code>.</p>
+  </section>
+
+  <section id="s1">
+    <h2>1. Recommended desktop setup</h2>
+      <p>For a normal Debian GNOME desktop use the kernel USB-audio driver with PipeWire, WirePlumber and the PipeWire PulseAudio layer, plus ALSA utilities for diagnostics.</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo apt update
+sudo apt install alsa-utils pipewire pipewire-audio pipewire-pulse pipewire-alsa wireplumber pavucontrol</code></pre></div>
+      <p>Check the services and the audio graph:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>systemctl --user status pipewire
+systemctl --user status pipewire-pulse
+systemctl --user status wireplumber
+wpctl status
+pactl info | grep "Server Name"</code></pre></div>
+  </section>
+
+  <section id="s2">
+    <h2>2. Identify the hardware</h2>
+      <p>Connect the interface directly to a USB port and run:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>lsusb
+aplay -l
+arecord -l
+cat /proc/asound/cards
+lsmod | grep snd_usb_audio
+cat /proc/asound/card*/stream0
+dmesg | grep -i -E 'usb|snd|scarlett|focusrite'</code></pre></div>
+      <p><code>stream0</code> shows the formats and sample rates this particular unit offers. Pick a rate from that list, never one copied from another model. If the driver is missing, <code>sudo modprobe snd_usb_audio</code> loads it.</p>
+  </section>
+
+  <section id="s3">
+    <h2>3. If the device is not detected</h2>
+      <p>Work through these in order:</p>
+      <ol class="steps"><li>Try another USB port.</li><li>Avoid an unpowered USB hub.</li><li>Try another known-good USB cable.</li><li>Check <code>lsusb</code> and <code>dmesg</code>.</li><li>Check that <code>snd_usb_audio</code> is loaded.</li><li>Reboot after a kernel update.</li><li>Check <code>aplay -l</code> and <code>arecord -l</code> again.</li></ol>
+      <p>If <code>lsusb</code> sees the device but ALSA does not, look at the kernel and driver layer.</p>
+  </section>
+
+  <section id="s4">
+    <h2>4. Direct ALSA test</h2>
+      <p>Before debugging PipeWire, prove that ALSA can talk to the hardware. Replace <code>X,Y</code> with the numbers from <code>aplay -l</code>.</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>speaker-test -D hw:X,Y -c 2 -r 48000 -f S16_LE
+aplay -v /usr/share/sounds/alsa/Front_Center.wav
+arecord -f S32_LE -r 48000 -c 2 test.wav -d 5
+aplay test.wav</code></pre></div>
+  </section>
+
+  <section id="s5">
+    <h2>5. "Device or resource busy"</h2>
+      <p>Find out who owns the sound device:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>lsof /dev/snd/*
+sudo fuser -v /dev/snd/*</code></pre></div>
+      <p>PipeWire may legitimately own the device during normal desktop use. For a temporary direct ALSA test, stop the user audio services and start them again afterwards:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>systemctl --user stop pipewire pipewire-pulse wireplumber
+<span class="c"># run the ALSA test here</span>
+systemctl --user start pipewire pipewire-pulse wireplumber</code></pre></div>
+      <p>Do not add boot-time scripts that unload and reload <code>snd_usb_audio</code>. The kernel loads it by itself.</p>
+  </section>
+
+  <section id="s6">
+    <h2>6. Pick the Scarlett in PipeWire</h2>
+      <p>The Scarlett should appear under Audio devices in <code>wpctl status</code>. Set the default output with the sink ID shown there:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>wpctl status
+wpctl set-default ID</code></pre></div>
+      <p><code>pavucontrol</code> shows output and input devices, application streams, volume and the selected profile.</p>
+  </section>
+
+  <section id="s7">
+    <h2>7. Scarlett 8i6: playback lag and the Pro Audio profile</h2>
+      <p>The 8i6 first appeared through an ACP-generated "Analog Surround 2.1" profile and had a delay when audio started after silence. Switching the card to <strong>Pro Audio</strong> made pause, resume and volume changes immediate.</p>
+      <div class="box tablewrap"><table><thead><tr><th>Item</th><th>Working observation</th></tr></thead><tbody><tr><td>Audio server</td><td>PipeWire 1.4.2 with PulseAudio compatibility</td></tr><tr><td>Session manager</td><td>WirePlumber 1.4.2</td></tr><tr><td>Interface</td><td>Focusrite Scarlett 8i6 USB (1235:8213)</td></tr><tr><td>USB autosuspend</td><td>ruled out</td></tr><tr><td>Profile</td><td>Pro Audio</td></tr><tr><td>HDA power save</td><td><code>power_save=0</code></td></tr><tr><td>Sink suspend</td><td><code>session.suspend-timeout-seconds = 0</code></td></tr></tbody></table></div>
+      <p>Check and set the profile (use the card name from <code>pactl list cards short</code>):</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>pactl list cards | grep -A1 'Active Profile'
+pactl set-card-profile CARD_NAME pro-audio</code></pre></div>
+      <p>In Pro Audio mode the 8i6 is shown as a six-channel interface (<code>AUX0</code> to <code>AUX5</code>); a stereo stream lands on the first pair. The WirePlumber rule that stops ALSA sinks from suspending:</p>
+      <div class="code"><span class="lang">ini</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>monitor.alsa.rules = [
+  {
+    matches = [
+      {
+        node.name = "~alsa_.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        session.suspend-timeout-seconds = 0
+      }
+    }
+  }
+]</code></pre></div>
+      <p>Keep it as a deliberate setting, do not copy it blindly to every system. HDA power saving was also switched off during the 8i6 work (<code>options snd_hda_intel power_save=0</code>); this is not necessarily needed for other models.</p>
+  </section>
+
+  <section id="s8">
+    <h2>8. Scarlett 2i2 Gen 1: the kernel issue</h2>
+      <p>The 1st Gen 2i2 has a kernel specific problem. The affected USB IDs include:</p>
+      <div class="code"><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>1235:8006
+1235:8016</code></pre></div>
+      <p>Upstream Linux has fixes for a wrong USB interface setup that can show up as distorted or silent audio. Check the ID and the running kernel:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>lsusb
+uname -r</code></pre></div>
+      <p>Debian Trixie's stock kernel is in the 6.12 series; Trixie backports provides newer ones (6.18 at the time of writing). If the stock kernel gives distorted or silent audio on the 2i2 Gen 1, use a current backports kernel. Enable the repository:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo tee /etc/apt/sources.list.d/trixie-backports.sources &lt;&lt;'EOT'
+Types: deb
+URIs: http://deb.debian.org/debian
+Suites: trixie-backports
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOT</code></pre></div>
+      <p>Install the kernel and reboot:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>sudo apt update
+sudo apt install -t trixie-backports linux-image-amd64 linux-headers-amd64
+sudo reboot</code></pre></div>
+      <p>Verify with <code>uname -r</code>, and keep the previous kernel installed until the 2i2 is confirmed working. If your current kernel already behaves, do not change it.</p>
+  </section>
+
+  <section id="s9">
+    <h2>9. Scarlett 2i2 Gen 1: what you do NOT need</h2>
+      <ul class="plain"><li>No proprietary Focusrite Linux driver (Focusrite does not officially support Linux; the 1st Gen is class compliant)</li><li>No Focusrite Control or MixControl</li><li>No boot-time <code>snd_usb_audio</code> reload script</li><li>No <code>alsa-scarlett-gui</code>: the small 1st Gen models (Solo, 2i2, 2i4) have no software controls</li></ul>
+  </section>
+
+  <section id="s10">
+    <h2>10. Optional ~/.asoundrc</h2>
+      <p>Only create a custom ALSA device if an application really needs one. First find the card number with <code>cat /proc/asound/cards</code> and <code>aplay -L</code>. A stereo 2i2 example, saved as <code>~/.asoundrc</code> (this is ALSA syntax, do not paste it into Bash):</p>
+      <div class="code"><span class="lang">ini</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>pcm.scarlett {
+  type plug
+  slave {
+    pcm "hw:0,0"
+    rate 48000
+    format S32_LE
+    channels 2
+  }
+}
+
+pcm.!default pcm.scarlett
+
+ctl.!default {
+  type hw
+  card 0
+}</code></pre></div>
+      <p>Test it:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>aplay -D scarlett -v /usr/share/sounds/alsa/Front_Center.wav</code></pre></div>
+      <p>If PipeWire is your desktop audio server you normally do not need this.</p>
+  </section>
+
+  <section id="s11">
+    <h2>11. Optional 96 kHz ALSA device</h2>
+      <p>Use it only if <code>cat /proc/asound/card*/stream0</code> confirms 96 kHz on your unit. For the 2i2:</p>
+      <div class="code"><span class="lang">ini</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>pcm.scarlett96 {
+  type plug
+  slave {
+    pcm "hw:0,0"
+    rate 96000
+    format S32_LE
+    channels 2
+  }
+}</code></pre></div>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>aplay -D scarlett96 -v /usr/share/sounds/alsa/Front_Center.wav</code></pre></div>
+      <p>The 8i6 ALSA-only setup used 96 kHz with six playback and ten capture channels (device <code>hw:0</code>, channels 6 and 10); the full definition is in the 8i6 PDF in the repository.</p>
+  </section>
+
+  <section id="s12">
+    <h2>12. Diagnostic bundle</h2>
+      <p>Run this when you ask for help. It only prints information:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>echo '=== Kernel ==='; uname -r
+echo '=== Debian ==='; cat /etc/debian_version
+echo '=== USB ==='; lsusb | grep -i -E 'focusrite|scarlett'
+echo '=== ALSA cards ==='; cat /proc/asound/cards
+echo '=== Playback ==='; aplay -l
+echo '=== Capture ==='; arecord -l
+echo '=== Driver ==='; lsmod | grep snd_usb_audio
+echo '=== Stream capabilities ==='; cat /proc/asound/card*/stream0
+echo '=== Kernel messages ==='; dmesg | grep -i -E 'usb|snd|scarlett|focusrite' | tail -100
+echo '=== PipeWire ==='; wpctl status
+echo '=== PipeWire services ==='; systemctl --user --no-pager status pipewire pipewire-pulse wireplumber
+echo '=== Pulse compatibility ==='; pactl info | grep 'Server Name'
+echo '=== Device ownership ==='; lsof /dev/snd/* 2&gt;/dev/null || true</code></pre></div>
+      <p>Save it as <code>diagnostics.sh</code> and run <code>bash diagnostics.sh &gt; scarlett-diagnostics.txt 2&gt;&amp;1</code>.</p>
+  </section>
+
+  <section id="s13">
+    <h2>13. Troubleshooting order</h2>
+      <p>Always go from the bottom up:</p>
+      <ol class="steps"><li><strong>USB:</strong> <code>lsusb</code>. If this fails, do not touch PipeWire yet.</li><li><strong>Kernel and driver:</strong> <code>lsmod | grep snd_usb_audio</code> and <code>dmesg</code>.</li><li><strong>ALSA:</strong> <code>aplay -l</code>, <code>arecord -l</code>, <code>stream0</code>.</li><li><strong>Direct playback:</strong> <code>speaker-test -D hw:X,Y -c 2 -r 48000 -f S16_LE</code>.</li><li><strong>PipeWire:</strong> <code>wpctl status</code> and the three user services.</li><li><strong>Applications:</strong> only now look at Firefox, Chromium, GNOME and so on.</li></ol>
+  </section>
+
+  <section id="s14">
+    <h2>14. Quick recovery checklist</h2>
+      <p>If the Scarlett suddenly stops working:</p>
+      <div class="code"><span class="lang">shell</span><button type="button" class="copy" aria-label="Copy this code to the clipboard">Copy</button><pre><code>lsusb
+aplay -l
+arecord -l
+lsmod | grep snd_usb_audio
+cat /proc/asound/cards
+cat /proc/asound/card*/stream0
+wpctl status
+systemctl --user status pipewire pipewire-pulse wireplumber
+lsof /dev/snd/*</code></pre></div>
+      <ul class="plain"><li>USB missing: cable, port, hub, kernel.</li><li>USB there but no ALSA card: <code>snd_usb_audio</code> and the kernel.</li><li>ALSA works but desktop audio does not: PipeWire and WirePlumber.</li><li>"Busy": find the owner with <code>lsof</code> or <code>fuser</code>.</li><li>2i2 Gen 1 distorted or silent: check the USB ID and kernel version before changing anything else.</li></ul>
+  </section>
+
+  <section id="s15">
+    <h2>15. Known open issue</h2>
+      <p>On the 8i6, live streams in Firefox (live radio, live YouTube) could sound robotic or crackly, while normal videos and Chromium were clean. PipeWire showed no errors and sample-rate unification did not help. This is <strong>unresolved</strong>, it is not a 2i2 issue, and no fix is claimed here.</p>
+  </section>
+
+  <section id="s16">
+    <h2>16. Get the guides</h2>
+      <p>The repository has the full guides as PDF files: a combined reference, one for the 8i6 and one for the 2i2 Gen 1, plus a README with the commands in this page.</p>
+      <ul class="plain"><li>Repository: <a href="https://github.com/why0712/focusrite.scarlett.pro.audio.trixie" target="_blank" rel="noopener">github.com/why0712/focusrite.scarlett.pro.audio.trixie</a></li></ul>
+  </section>
+
+  <footer>
+    <b>9A3WHY</b> &middot; QRV &middot; 73 DE 9A3WHY &middot; <a href="/privacy/">privacy</a> &middot; <a href="/terms/">terms</a>
+  </footer>
+
+</main>
+<script>
+(function () {
+  if (!navigator.clipboard) { document.documentElement.className = document.documentElement.className.replace(" js", ""); return; }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest(".copy") : null;
+    if (!b) return;
+    var code = b.parentNode.querySelector("pre code");
+    navigator.clipboard.writeText(code.textContent.replace(/\n$/, "") + "\n").then(function () {
+      b.textContent = "Copied"; b.classList.add("done");
+      setTimeout(function () { b.textContent = "Copy"; b.classList.remove("done"); }, 1600);
+    }, function () { b.textContent = "Select + Ctrl+C"; });
+  });
+})();
+</script>
+</body>
+</html>
