@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "www-9a3why-space",
+  "compatibility_date": "2026-11-18",
+  "observability": { "enabled": false },
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "404-page"
+  }
+}
