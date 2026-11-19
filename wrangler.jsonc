@@ -3,7 +3,7 @@
   "name": "www-9a3why-space",
   "compatibility_date": "2026-11-18",
   "observability": { "enabled": false },
-  "workers_dev": true,
+  "workers_dev": false,
   "preview_urls": false,
   "routes": [
     { "pattern": "www.9a3why.space", "custom_domain": true },
