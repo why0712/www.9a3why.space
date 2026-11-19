@@ -5,6 +5,10 @@
   "observability": { "enabled": false },
   "workers_dev": true,
   "preview_urls": false,
+  "routes": [
+    { "pattern": "www.9a3why.space", "custom_domain": true },
+    { "pattern": "9a3why.space", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".",
     "not_found_handling": "404-page"
